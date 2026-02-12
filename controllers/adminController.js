@@ -171,7 +171,7 @@ const getAllVisitsForAdmin = async (req, res) => {
 // @access  Private/Admin
 const updateVisitStatus = async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, rejectionReason } = req.body;
 
         if (!['pending', 'verified', 'rejected'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
@@ -181,6 +181,11 @@ const updateVisitStatus = async (req, res) => {
 
         if (visit) {
             visit.status = status;
+            if (status === 'rejected') {
+                visit.rejectionReason = rejectionReason || 'No reason provided';
+            } else {
+                visit.rejectionReason = undefined; // Clear reason if status changed to verified/pending
+            }
             await visit.save();
             res.json(visit);
         } else {

@@ -1,97 +1,90 @@
 # Field Staff Management Backend
 
-This is the backend API for the Field Staff Management application. It provides endpoints for authentication, farmer management, visit logging, and specialized recommendations.
+This is the backend API for the Field Staff Management application, built with Node.js, Express, and MongoDB. It provides a robust set of features for authentication, farmer data management, agricultural visit logging, and administrative reporting.
 
-## Tech Stack
+## 🚀 Tech Stack
 
 -   **Runtime**: Node.js
 -   **Framework**: Express.js
--   **Database**: MongoDB (with Mongoose)
+-   **Database**: MongoDB (Mongoose ODM)
 -   **Authentication**: JWT (JSON Web Tokens)
--   **Image Storage**: Cloudinary (via Multer)
+-   **Media Storage**: Cloudinary (via Multer)
+-   **Notifications**: Internal notification system for administrative events
 
-## Prerequisites
+## ⚙️ Prerequisites
 
-Before running this project, ensure you have the following installed:
+-   **Node.js**: v18.0.0+
+-   **MongoDB**: Local instance or Atlas URI
+-   **Cloudinary**: Account for image storage (Field session evidence)
 
--   [Node.js](https://nodejs.org/) (v14 or higher)
--   [MongoDB](https://www.mongodb.com/) (Local or AtlasURI)
+## 🔧 Installation & Setup
 
-You will also need a **Cloudinary** account solely for image upload functionality.
-
-## Installation
-
-1.  **Clone the repository** (if applicable) or navigate to the `backend` directory:
-    ```bash
-    cd backend
-    ```
-
-2.  **Install dependencies**:
+1.  **Install dependencies**:
     ```bash
     npm install
     ```
 
-## Environment Variables
-
-Create a `.env` file in the root of the `backend` directory and add the following variables:
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-```
-
-## Running the Server
-
--   **Development Mode** (with hot reloading):
-    ```bash
-    npm run dev
+2.  **Environment Variables**:
+    Create a `.env` file in the `backend/` directory:
+    ```env
+    PORT=5000
+    MONGO_URI=your_mongodb_uri
+    JWT_SECRET=your_jwt_secret
+    CLOUDINARY_CLOUD_NAME=your_cloud_name
+    CLOUDINARY_API_KEY=your_api_key
+    CLOUDINARY_API_SECRET=your_api_secret
     ```
 
--   **Production Mode**:
+3.  **Seed Admin Account**:
     ```bash
-    npm start
+    npm run seed:admin
     ```
 
-The server will start on `http://localhost:5000` (or the port specified in your `.env`).
+4.  **Start Server**:
+    - Development: `npm run dev`
+    - Production: `npm start`
 
-## Accessing Logs
+## 📡 API Endpoints
 
--   To enable or disable console logs (for debugging), check the `server.js` or middleware configurations.
+### 🔐 Authentication
+- `POST /api/auth/register` - Register new staff
+- `POST /api/auth/login` - Authenticate and receive JWT
 
-## API Endpoints
+### 🌾 Farmers
+- `GET /api/farmers` - List all farmers
+- `POST /api/farmers` - Register a new farmer
+- `GET /api/farmers/:id` - Get detailed farmer profile
+- `DELETE /api/farmers/:id` - Remove farmer record
 
-### Authentication
--   `POST /api/auth/register` - Register a new staff user.
--   `POST /api/auth/login` - Login and receive a JWT token.
+### 🚜 Farm Visits
+- `GET /api/visits` - List visits (Role-filtered)
+- `POST /api/visits` - Log a new visit session
+- `GET /api/visits/:id` - View visit details and evidence
 
-### Farmers
--   `GET /api/farmers` - Get all farmers (Protected).
--   `POST /api/farmers` - Create a new farmer (Protected).
--   `GET /api/farmers/:id` - Get a specific farmer by ID (Protected).
+### 📊 Reports & Admin
+- `POST /api/reports` - Submit Staff EOD report
+- `GET /api/reports/daily-stats` - Get current day activity for logged-in staff
+- `GET /api/reports/admin` - Admin: View all staff submissions
+- `GET /api/admin/metrics` - Admin: Dashboard analytics data
+- `GET /api/admin/visits` - Admin: List visits for verification
+- `PATCH /api/admin/visits/:id/verify` - Admin: Verify or Reject visit reports
 
-### Visits
--   `GET /api/visits` - Get all visits (Protected).
--   `POST /api/visits` - Log a new visit (Protected).
+### 📩 Communications
+- `POST /api/contact` - Submit public contact form messages
+- `GET /api/notifications` - Retrieve system notifications
 
-### Recommendations
--   `GET /api/recommendations` - Get recommendations (Protected).
+### 🖼️ Media
+- `POST /api/upload` - Secure image upload to Cloudinary
 
-### Uploads
--   `POST /api/upload` - Upload an image to Cloudinary (Protected/Public depending on config).
+## 📂 Project Structure
 
-## Folder Structure
+- **config/**: Database connection logic
+- **controllers/**: Business logic and request handling
+- **middleware/**: Auth protection and role validation
+- **models/**: Mongoose schemas (Farmer, User, Visit, DailyReport, Contact, etc.)
+- **routes/**: API endpoint definitions
+- **scripts/**: Database seeding and maintenance utilities
+- **utils/**: Shared helper functions
 
--   **config**: Database configuration (`db.js`).
--   **controllers**: Route logic and request handling.
--   **middleware**: Custom middleware (e.g., authentication).
--   **models**: Mongoose schemas (`User`, `Farmer`, `Visit`, `Recommendation`, `Image`).
--   **routes**: API route definitions.
--   **utils**: Utility functions.
-
-## License
-
-This project is licensed under the ISC License.
+## 📄 License
+ISC License

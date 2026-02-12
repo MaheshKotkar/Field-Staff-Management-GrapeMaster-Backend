@@ -1,11 +1,18 @@
 const Farmer = require('../models/Farmer');
+const { notifyAdmins } = require('./notificationController');
 
 // @desc    Get all farmers
 // @route   GET /api/farmers
 // @access  Private
 const getFarmers = async (req, res) => {
     try {
-        const farmers = await Farmer.find({}).populate('createdBy', 'name');
+        let query = {};
+        // If user is staff, only show farmers they created
+        if (req.user && req.user.role === 'staff') {
+            query.createdBy = req.user._id;
+        }
+
+        const farmers = await Farmer.find(query).populate('createdBy', 'name');
         res.json(farmers);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -20,6 +27,10 @@ const getFarmerById = async (req, res) => {
         const farmer = await Farmer.findById(req.params.id).populate('createdBy', 'name');
 
         if (farmer) {
+            // Check if user is staff and if they are the creator
+            if (req.user.role === 'staff' && farmer.createdBy._id.toString() !== req.user._id.toString()) {
+                return res.status(401).json({ message: 'Not authorized to view this farmer' });
+            }
             res.json(farmer);
         } else {
             res.status(404).json({ message: 'Farmer not found' });
@@ -47,6 +58,19 @@ const createFarmer = async (req, res) => {
         });
 
         const createdFarmer = await farmer.save();
+
+        // Notify Admins
+        await notifyAdmins({
+            type: 'farmer',
+            title: 'New Farmer Registered',
+            message: `${req.user.name} registered a new farmer: ${name} from ${village}`,
+            metadata: {
+                id: createdFarmer._id,
+                staffName: req.user.name,
+                staffId: req.user._id
+            }
+        });
+
         res.status(201).json(createdFarmer);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -61,6 +85,11 @@ const updateFarmer = async (req, res) => {
         const farmer = await Farmer.findById(req.params.id);
 
         if (farmer) {
+            // Check if user is staff and if they are the creator
+            if (req.user.role === 'staff' && farmer.createdBy.toString() !== req.user._id.toString()) {
+                return res.status(401).json({ message: 'Not authorized to update this farmer' });
+            }
+
             farmer.name = req.body.name || farmer.name;
             farmer.contact = req.body.contact || farmer.contact;
             farmer.village = req.body.village || farmer.village;
@@ -86,6 +115,11 @@ const deleteFarmer = async (req, res) => {
         const farmer = await Farmer.findById(req.params.id);
 
         if (farmer) {
+            // Check if user is staff and if they are the creator
+            if (req.user.role === 'staff' && farmer.createdBy.toString() !== req.user._id.toString()) {
+                return res.status(401).json({ message: 'Not authorized to delete this farmer' });
+            }
+
             await farmer.deleteOne();
             res.json({ message: 'Farmer removed' });
         } else {

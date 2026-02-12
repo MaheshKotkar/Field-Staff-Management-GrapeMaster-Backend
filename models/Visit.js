@@ -42,6 +42,9 @@ const visitSchema = mongoose.Schema(
             enum: ['pending', 'verified', 'rejected'],
             default: 'pending',
         },
+        rejectionReason: {
+            type: String,
+        },
     },
     {
         timestamps: true,

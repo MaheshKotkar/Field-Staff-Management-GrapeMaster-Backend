@@ -1,5 +1,6 @@
 const DailyReport = require('../models/DailyReport');
 const Visit = require('../models/Visit');
+const { notifyAdmins } = require('./notificationController');
 
 // @desc    Calculate daily stats for a consultant
 // @route   GET /api/reports/daily-stats
@@ -58,6 +59,19 @@ const submitDailyReport = async (req, res) => {
         });
 
         const createdReport = await report.save();
+
+        // Notify Admins
+        await notifyAdmins({
+            type: 'report',
+            title: 'New Daily Summary Submitted',
+            message: `${req.user.name} submitted their daily report with ${visitCount} visits and ${totalKm} KM covered.`,
+            metadata: {
+                id: createdReport._id,
+                staffName: req.user.name,
+                staffId: req.user._id
+            }
+        });
+
         res.status(201).json(createdReport);
     } catch (error) {
         res.status(500).json({ message: error.message });
