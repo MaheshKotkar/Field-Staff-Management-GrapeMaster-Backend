@@ -196,8 +196,27 @@ const updateVisitStatus = async (req, res) => {
     }
 };
 
+// @desc    Delete a user
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (user) {
+            await User.deleteOne({ _id: user._id });
+            res.json({ message: 'User removed' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getDashboardMetrics,
     getAllVisitsForAdmin,
-    updateVisitStatus
+    updateVisitStatus,
+    deleteUser
 };
